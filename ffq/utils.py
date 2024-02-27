@@ -8,7 +8,7 @@ from ftplib import FTP
 from bs4 import BeautifulSoup
 from frozendict import frozendict
 import logging
-
+import time
 from .exceptions import InvalidAccession, ConnectionError, BadData
 from .config import (
     CROSSREF_URL,
@@ -48,6 +48,7 @@ def cached_get(*args, **kwargs):
     :return: text of response
     :rtype: str
     """
+    time.sleep(1)
     response = requests.get(*args, **kwargs)
     try:
         response.raise_for_status()
