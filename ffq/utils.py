@@ -48,7 +48,6 @@ def cached_get(*args, **kwargs):
     :return: text of response
     :rtype: str
     """
-    time.sleep(1)
     response = requests.get(*args, **kwargs)
     try:
         response.raise_for_status()
