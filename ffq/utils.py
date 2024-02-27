@@ -29,6 +29,7 @@ from .config import (
     FTP_GEO_SUPPL,
     ENCODE_BIOSAMPLE_URL,
     ENCODE_JSON,
+    NCBI_TOKEN,
 )
 
 RUN_PARSER = re.compile(r"(SRR.+)|(ERR.+)|(DRR.+)")
@@ -530,13 +531,16 @@ def ncbi_fetch_fasta(accession, db):
     :return: BeautifulSoup object with fastq files information
     :rtype: bs4.BeautifulSoup
     """
-    response = requests.get(
-        NCBI_FETCH_URL,
-        params={
+    params={
             "db": db,
             "id": accession,
             "retmode": "xml",  # max allowed
-        },
+        }
+    if NCBI_TOKEN != "":
+        params["api_key"] = NCBI_TOKEN
+    response = requests.get(
+        NCBI_FETCH_URL,
+        params=params,
     )
     try:
         response.raise_for_status()
@@ -562,16 +566,19 @@ def ncbi_summary(db, id):
     :return: dictionary of id-summary pairs
     :rtype: dict
     """
-    # TODO: use cached get. Can't be used currently because dictionaries can
-    # not be hashed.
-    response = requests.get(
-        NCBI_SUMMARY_URL,
-        params={
+    params={
             "db": db,
             "id": id,
             "retmode": "json",
             "retmax": 10000,  # maximum allowed
-        },
+        }
+    if NCBI_TOKEN != "":
+        params["api_key"] = NCBI_TOKEN
+    # TODO: use cached get. Can't be used currently because dictionaries can
+    # not be hashed.
+    response = requests.get(
+        NCBI_SUMMARY_URL,
+        params=params,
     )
     response.raise_for_status()
     return {
@@ -592,16 +599,20 @@ def ncbi_search(db, term):
     :return: list of ids that match the search
     :rtype: list
     """
-    # TODO: use cached get. Can't be used currently because dictionaries can
-    # not be hashed.
-    response = requests.get(
-        NCBI_SEARCH_URL,
-        params={
+
+    params={
             "db": db,
             "term": term,
             "retmode": "json",
             "retmax": 100000,  # max allowed
-        },
+        }
+    if NCBI_TOKEN != "":
+        params["api_key"] = NCBI_TOKEN
+    # TODO: use cached get. Can't be used currently because dictionaries can
+    # not be hashed.
+    response = requests.get(
+        NCBI_SEARCH_URL,
+        params=params,
     )
     response.raise_for_status()
     return sorted(response.json().get("esearchresult", {}).get("idlist", []))
@@ -623,14 +634,17 @@ def ncbi_link(origin, destination, id):
     """
     # TODO: use cached get. Can't be used currently because dictionaries can
     # not be hashed.
-    response = requests.get(
-        NCBI_LINK_URL,
-        params={
+    params={
             "dbfrom": origin,
             "db": destination,
             "id": id,
             "retmode": "json",
-        },
+        }
+    if NCBI_TOKEN != "":
+        params["api_key"] = NCBI_TOKEN
+    response = requests.get(
+        NCBI_LINK_URL,
+        params=params,
     )
     response.raise_for_status()
     ids = []
@@ -720,9 +734,12 @@ def geo_ids_to_gses(ids):
     :return: list of GSE accessions
     :rtype: list
     """
+    params={"db": "gds", "id": ",".join(ids)}
+    if NCBI_TOKEN != "":
+        params["api_key"] = NCBI_TOKEN
     # TODO: use cached get. Can't be used currently because dictionaries can
     # not be hashed.
-    response = requests.get(NCBI_FETCH_URL, params={"db": "gds", "id": ",".join(ids)})
+    response = requests.get(NCBI_FETCH_URL, params=params)
     response.raise_for_status()
     return sorted(list(set(GSE_PARSER.findall(response.text))))
 
@@ -736,9 +753,12 @@ def sra_ids_to_srrs(ids):
     :return: list of SRR accessions
     :rtype: list
     """
+    params={"db": "sra", "id": ",".join(ids)}
+    if NCBI_TOKEN != "":
+        params["api_key"] = NCBI_TOKEN
     # TODO: use cached get. Can't be used currently because dictionaries can
     # not be hashed.
-    response = requests.get(NCBI_SUMMARY_URL, params={"db": "sra", "id": ",".join(ids)})
+    response = requests.get(NCBI_SUMMARY_URL, params=params)
     response.raise_for_status()
     return sorted(list(set(SRR_PARSER.findall(response.text))))
 
