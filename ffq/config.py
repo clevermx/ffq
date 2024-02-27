@@ -29,7 +29,3 @@ FTP_GEO_SUPPL = "/suppl/"
 ENCODE_BIOSAMPLE_URL = "https://www.encodeproject.org/biosamples/"
 ENCODE_JSON = "/?format=json"
 
-
-# NCBI TOKEN
-import os 
-NCBI_TOKEN = os.environ.get('NCBI_API_KEY', "")

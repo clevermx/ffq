@@ -5,7 +5,7 @@ import os
 import sys
 
 from ffq.exceptions import CliError, InvalidAccession, FfqException, FailToFetchData
-from ffq.utils import findkey
+from ffq.utils import findkey , ncbi_token
 
 from . import __version__
 from .ffq import (
@@ -172,8 +172,7 @@ def run_ffq(args):
     
     if args.ncbi_api_key:
         os.environ['NCBI_API_KEY'] = args.ncbi_api_key
-    from .config import NCBI_TOKEN
-    logger.debug("NCBI API KEY = " + NCBI_TOKEN)
+    logger.debug("NCBI API KEY = " + ncbi_token())
     if args.l:
         if ([args.ftp, args.ncbi, args.gcp, args.aws]).count(True) > 0:
             raise CliError("`-l` is not compatible with link fetching.")

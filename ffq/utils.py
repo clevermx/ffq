@@ -10,6 +10,7 @@ from frozendict import frozendict
 import logging
 import time
 from .exceptions import InvalidAccession, ConnectionError, BadData
+import os 
 from .config import (
     CROSSREF_URL,
     ENA_SEARCH_URL,
@@ -29,8 +30,10 @@ from .config import (
     FTP_GEO_SUPPL,
     ENCODE_BIOSAMPLE_URL,
     ENCODE_JSON,
-    NCBI_TOKEN,
 )
+
+# NCBI TOKEN
+
 
 RUN_PARSER = re.compile(r"(SRR.+)|(ERR.+)|(DRR.+)")
 GSE_PARSER = re.compile(r"Series\t\tAccession: (?P<accession>GSE[0-9]+)\t")
@@ -536,8 +539,9 @@ def ncbi_fetch_fasta(accession, db):
             "id": accession,
             "retmode": "xml",  # max allowed
         }
-    if NCBI_TOKEN != "":
-        params["api_key"] = NCBI_TOKEN
+    api_key = ncbi_token()
+    if api_key != "":
+        params["api_key"] = api_key
     response = requests.get(
         NCBI_FETCH_URL,
         params=params,
@@ -572,8 +576,9 @@ def ncbi_summary(db, id):
             "retmode": "json",
             "retmax": 10000,  # maximum allowed
         }
-    if NCBI_TOKEN != "":
-        params["api_key"] = NCBI_TOKEN
+    api_key = ncbi_token()
+    if api_key != "":
+        params["api_key"] = api_key
     # TODO: use cached get. Can't be used currently because dictionaries can
     # not be hashed.
     response = requests.get(
@@ -606,8 +611,9 @@ def ncbi_search(db, term):
             "retmode": "json",
             "retmax": 100000,  # max allowed
         }
-    if NCBI_TOKEN != "":
-        params["api_key"] = NCBI_TOKEN
+    api_key = ncbi_token()
+    if api_key != "":
+        params["api_key"] = api_key
     # TODO: use cached get. Can't be used currently because dictionaries can
     # not be hashed.
     response = requests.get(
@@ -640,8 +646,9 @@ def ncbi_link(origin, destination, id):
             "id": id,
             "retmode": "json",
         }
-    if NCBI_TOKEN != "":
-        params["api_key"] = NCBI_TOKEN
+    api_key = ncbi_token()
+    if api_key != "":
+        params["api_key"] = api_key
     response = requests.get(
         NCBI_LINK_URL,
         params=params,
@@ -735,8 +742,9 @@ def geo_ids_to_gses(ids):
     :rtype: list
     """
     params={"db": "gds", "id": ",".join(ids)}
-    if NCBI_TOKEN != "":
-        params["api_key"] = NCBI_TOKEN
+    api_key = ncbi_token()
+    if api_key != "":
+        params["api_key"] = api_key
     # TODO: use cached get. Can't be used currently because dictionaries can
     # not be hashed.
     response = requests.get(NCBI_FETCH_URL, params=params)
@@ -754,8 +762,9 @@ def sra_ids_to_srrs(ids):
     :rtype: list
     """
     params={"db": "sra", "id": ",".join(ids)}
-    if NCBI_TOKEN != "":
-        params["api_key"] = NCBI_TOKEN
+    api_key = ncbi_token()
+    if api_key != "":
+        params["api_key"] = api_key
     # TODO: use cached get. Can't be used currently because dictionaries can
     # not be hashed.
     response = requests.get(NCBI_SUMMARY_URL, params=params)
@@ -1131,6 +1140,8 @@ def parse_bioproject(soup):
         "target_material": target_material,
     }
 
+def ncbi_token():
+    return os.environ.get('NCBI_API_KEY', "")
 
 def findkey(obj, key, objs=[]):
     if key in obj:
