@@ -126,7 +126,8 @@ def main():
     parser.add_argument("--gcp", help="Return GCP links", action="store_true")  # noqa
 
     parser.add_argument("--ncbi", help="Return NCBI links", action="store_true")  # noqa
-    parser.add_argument("--ncbi_api_key", help="Pring curent ncbi API  key", action="store_true")
+    parser.add_argument("--ncbi_api_key", help="Set ncbi API key", type=str, required = False)
+
     parser.add_argument(
         "--split",
         help="Split output into separate files by accession  (`-o` is a directory)",  # noqa
@@ -145,9 +146,7 @@ def main():
         sys.exit(1)
 
     args = parser.parse_args()
-    if (args.ncbi_api_key):
-        from .config import NCBI_TOKEN
-        print("api key : " + NCBI_TOKEN)
+
     try:
         print(json.dumps(run_ffq(args), indent=4))
     except FfqException as e:
@@ -170,7 +169,11 @@ def run_ffq(args):
     # Check the -o is provided if --split is set
     if args.split and not args.o:
         raise CliError("`-o` must be provided when using `--split`")
-
+    
+    if args.ncbi_api_key:
+        os.environ['NCBI_API_KEY'] = args.ncbi_api_key
+    from .config import NCBI_TOKEN
+    logger.debug("NCBI API KEY = " + NCBI_TOKEN)
     if args.l:
         if ([args.ftp, args.ncbi, args.gcp, args.aws]).count(True) > 0:
             raise CliError("`-l` is not compatible with link fetching.")
