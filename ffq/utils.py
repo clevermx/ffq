@@ -11,6 +11,7 @@ import logging
 import time
 from .exceptions import InvalidAccession, ConnectionError, BadData
 import os 
+import time
 from .config import (
     CROSSREF_URL,
     ENA_SEARCH_URL,
@@ -52,6 +53,7 @@ def cached_get(*args, **kwargs):
     :return: text of response
     :rtype: str
     """
+    time.sleep(0.5)
     response = requests.get(*args, **kwargs)
     try:
         response.raise_for_status()
@@ -542,6 +544,7 @@ def ncbi_fetch_fasta(accession, db):
     api_key = ncbi_token()
     if api_key != "":
         params["api_key"] = api_key
+    time.sleep(0.5)
     response = requests.get(
         NCBI_FETCH_URL,
         params=params,
@@ -616,6 +619,7 @@ def ncbi_search(db, term):
         params["api_key"] = api_key
     # TODO: use cached get. Can't be used currently because dictionaries can
     # not be hashed.
+    time.sleep(0.5)
     response = requests.get(
         NCBI_SEARCH_URL,
         params=params,
@@ -649,6 +653,7 @@ def ncbi_link(origin, destination, id):
     api_key = ncbi_token()
     if api_key != "":
         params["api_key"] = api_key
+    time.sleep(0.5)
     response = requests.get(
         NCBI_LINK_URL,
         params=params,
@@ -747,6 +752,7 @@ def geo_ids_to_gses(ids):
         params["api_key"] = api_key
     # TODO: use cached get. Can't be used currently because dictionaries can
     # not be hashed.
+    time.sleep(0.5)
     response = requests.get(NCBI_FETCH_URL, params=params)
     response.raise_for_status()
     return sorted(list(set(GSE_PARSER.findall(response.text))))
@@ -767,6 +773,7 @@ def sra_ids_to_srrs(ids):
         params["api_key"] = api_key
     # TODO: use cached get. Can't be used currently because dictionaries can
     # not be hashed.
+    time.sleep(0.5)
     response = requests.get(NCBI_SUMMARY_URL, params=params)
     response.raise_for_status()
     return sorted(list(set(SRR_PARSER.findall(response.text))))
