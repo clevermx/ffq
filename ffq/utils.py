@@ -9,10 +9,10 @@ from bs4 import BeautifulSoup
 from frozendict import frozendict
 import logging
 import time
-from .exceptions import InvalidAccession, ConnectionError, BadData
+from ffq.exceptions import InvalidAccession, ConnectionError, BadData
 import os 
 import time
-from .config import (
+from ffq.config import (
     CROSSREF_URL,
     ENA_SEARCH_URL,
     ENA_URL,
@@ -83,6 +83,7 @@ def get_xml(accession):
     """
 
     return BeautifulSoup(cached_get(f"{ENA_URL}/{accession}"), "xml")
+
 
 
 def get_encode_json(accession):
@@ -626,6 +627,7 @@ def ncbi_search(db, term):
     )
     response.raise_for_status()
     return sorted(response.json().get("esearchresult", {}).get("idlist", []))
+
 
 
 def ncbi_link(origin, destination, id):

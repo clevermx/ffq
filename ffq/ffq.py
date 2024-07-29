@@ -544,7 +544,13 @@ def ffq_sample(accession, level=None):
     :rtype: dict
     """
     logger.info(f"Parsing sample {accession}")
-    xml_sample = get_xml(accession)
+    try:
+        xml_sample = get_xml(accession)
+    except:
+        #term=SRS15730023&report=FullXml
+        logger.warning(f"Fail get ena xml for {accession}. Try ncbi.")
+        srs_ids = ncbi_search("sra", accession)
+        xml_sample = ncbi_fetch_fasta(srs_ids, "sra")
     sample = parse_sample(xml_sample)
     if level is None or level != 1:
         try:
